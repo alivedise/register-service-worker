@@ -23,9 +23,23 @@ if (typeof window !== 'undefined') {
   // worker support (in that case it would do nothing), there's a chance that
   // `Promise` does not exist. So we must check for its existence first.
   if (typeof Promise !== 'undefined') {
-    waitWindowLoad = new Promise(resolve => window.addEventListener('load', resolve))
+    waitWindowLoad = new Promise((resolve) => {
+      if (typeof document !== 'undefined' && document.readyState === 'complete') {
+        resolve();
+        return;
+      }
+      window.addEventListener('load', resolve);
+    });
   } else {
-    waitWindowLoad = { then: (cb) => window.addEventListener('load', cb) }
+    waitWindowLoad = {
+      then: (cb) => {
+        if (typeof document !== 'undefined' && document.readyState === 'complete') {
+          cb();
+          return;
+        }
+        window.addEventListener('load', cb);
+      }
+    }
   }
 }
 
